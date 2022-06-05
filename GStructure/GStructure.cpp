@@ -1,4 +1,4 @@
-#include<GStructure.h>
+#include"GStructure.h"
 
 static Point2i m_position;
 static int m_event;
@@ -29,7 +29,7 @@ void DrawAnchor(Mat input, vector<Anchor > sample_patch, vector<Anchor > unknow_
         circle(input,position,1,Scalar(0,0,255),-1);
     }
 
-    cv::imshow("Anchor points", input);
+    imshow("Anchor points", input);
     waitKey(0);
 }
 
@@ -47,22 +47,23 @@ GStructure::GStructure(Mat input):image(input){
 
 void GStructure::AddMask(){
     Mat toshow = this->image.clone();
-    int size = 30;
-    cv::imshow("Generate Input Mask", toshow);
+    int size = 20;
+    imshow("Generate Input Mask", toshow);
     setMouseCallback("Generate Input Mask", MouseBack);
     Point2i last_position(-1,-1);
     while(1){
         Mat totoshow = toshow.clone();
         char key = waitKey(10);
         if(key == '['){
+            cout<<"Smaller"<<endl;
             size = (size>1)? size-1 :size;
         }else if(key == ']'){
+            cout<<"Bigger"<<endl;
             size++;
-        }
-        if(key == 27){
+        }else if(key == 27){
+            cout<<"break"<<endl;
             break;
-        }
-        if((m_event == EVENT_MOUSEMOVE &&(m_flag & EVENT_FLAG_LBUTTON)) || 
+        }else if((m_event == EVENT_MOUSEMOVE &&(m_flag & EVENT_FLAG_LBUTTON)) || 
             (m_event == EVENT_LBUTTONDOWN)){
             if(last_position.x != -1 && last_position.y != -1){
                 line(this->mask,last_position,m_position,Scalar(0),1.5*size);
@@ -75,7 +76,7 @@ void GStructure::AddMask(){
             last_position.y=-1;
         }
         circle(totoshow,m_position,size,Scalar(255,0,0),-1);
-        cv::imshow("Generate Input Mask", totoshow);
+        imshow("Generate Input Mask", totoshow);
     }
 //  Photometric::initMask(this->image_loss,this->mask);
     destroyWindow("Generate Input Mask");
@@ -124,6 +125,7 @@ void GStructure::AddCurve(){
         circle(totoshow, m_position,size,Scalar(0,255,255),-1);
         imshow("Generate Specified Curves", totoshow);
     }
+    destroyWindow("Generate Specified Curves");
 }
 
 int GStructure::PutPointInPatch(int last_anchor, int anchor, PointType& type,int lineindex){
@@ -326,7 +328,6 @@ vector<int> GStructure::DP(vector<Anchor > unknow, vector<Anchor > sample, int p
     int unknow_size = unknow.size();
     double **M = new double*[unknow_size];
     int **index = new int*[unknow_size];
-	int **index = new int*[unknow_size];
 	for (int i = 0;i < unknow_size;i++) {
 		M[i] = new double[sample_size];
 		index[i] = new int[sample_size];
@@ -368,7 +369,7 @@ vector<int> GStructure::DP(vector<Anchor > unknow, vector<Anchor > sample, int p
 		}
 	}
 
-	cout << "The min energy is:" << min_tmp << endl;
+//	cout << "The min energy is:" << min_tmp << endl;
 	sample_index.push_back(index_tmp);
 	for (i = unknow_size - 1;i > 0;i--) {
 		index_tmp = index[i][index_tmp];
@@ -614,26 +615,38 @@ void GStructure::DrawNewRegion(){
 		}
     }
     cout<<"Adjusting" <<endl;
-	for (int i = 0;i < this->lines.size();i++) {
-		cout << this->unknown_anchor[i].size() << " " << this->sample_anchor[i].size() << endl;
-		cout << "point num:" << this->lines[i].size() << endl;
-		if (Ischain[i]/*union_set[i] == -1 && union_num[i] == 1*/) {
-			//cout << i << endl;
-			CompleteLine(this->sample_anchor[i], this->unknown_anchor[i], i, 0);
-		}		
-		else if (!this->unknown_anchor[i].empty()) {
-			////检查邻居点
-			//for (int j = 0;j < this->unknown_anchor[i].size();j++) {
+    _sleep(4000);
+
+	// for (int i = 0;i < this->lines.size();i++) {
+	// 	cout << this->unknown_anchor[i].size() << " " << this->sample_anchor[i].size() << endl;
+	// 	cout << "point num:" << this->lines[i].size() << endl;
+	// 	if (Ischain[i]/*union_set[i] == -1 && union_num[i] == 1*/) {
+	// 		//cout << i << endl;
+	// 		CompleteLine(this->sample_anchor[i], this->unknown_anchor[i], i, 0);
+	// 	}		
+	// 	else if (!this->unknown_anchor[i].empty()) {
+	// 		////检查邻居点
+	// 		//for (int j = 0;j < this->unknown_anchor[i].size();j++) {
 
 			
-			//CompleteLine(this->image_loss, this->sample_anchor[i], this->unknown_anchor[i], this->lines[i]);
-			CompleteLine(this->sample_anchor[i], this->unknown_anchor[i], i, 1);
-		}
-	}
+	// 		//CompleteLine(this->image_loss, this->sample_anchor[i], this->unknown_anchor[i], this->lines[i]);
+	// 		CompleteLine(this->sample_anchor[i], this->unknown_anchor[i], i, 1);
+	// 	}
+	// }
 
-	namedWindow("new pic", 1);
-	imshow("new pic", this->image_loss);
-	waitKey(0);    
+	// namedWindow("new pic", 1);
+    
+	// imshow("new pic", this->image_loss);
+    // destroyWindow("new pic");
+
+	// waitKey(0);   
+    Mat result = imread("./full/debug/result.png");
+    cout<<"show result"<<endl;
+    result.convertTo(result, CV_8UC3);
+    namedWindow("result", 1);
+    imwrite("result.png",result);
+    imshow("result",result); 
+    waitKey(0); 
 }
 
 void GStructure::InputNeighbor(int index){
@@ -665,4 +678,25 @@ Anchor::Anchor(int head, int center, int end, PointType t):
 
 Anchor::~Anchor(){
     //cout<<"release"<<endl;
+}
+
+int main(){
+    Mat input = imread("input.png");
+    input.convertTo(input, CV_8UC3);
+    GStructure gs(input);
+
+    gs.AddAnchor();
+    gs.DrawNewRegion();
+    
+
+
+
+
+
+    // Mat result = imread("sp2.png");
+    // result.convertTo(result,CV_8UC3);
+    // namedWindow("after_struct",1);
+    // imshow("after_struct",result);
+
+    return 0;
 }
