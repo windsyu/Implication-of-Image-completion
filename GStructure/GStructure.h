@@ -53,10 +53,10 @@ private:
 //Return the patch of the image with a given anchor
     Mat GetPatch(Anchor anchor, int lineindex);
 //Mininize the Energy ,  unknown anchor , sample anchor, point index
-    double EI(Anchor unknow, Anchor sample, int p_index);
-    double ES(Anchor unknow, Anchor sample, int p_index);
-    double E1(Anchor unknow, Anchor sample, int p_index);
-    double E2(Anchor unknow1, Anchor unknow2, Anchor sample1, Anchor sample2, int p_index);
+    float EI(Anchor unknow, Anchor sample, int p_index);
+    float ES(Anchor unknow, Anchor sample, int p_index);
+    float E1(Anchor unknow, Anchor sample, int p_index);
+    float E2(Anchor unknow1, Anchor unknow2, Anchor sample1, Anchor sample2, int p_index);
 
 //Dynamic Program method
     vector<int > DP(vector<Anchor > unknow, vector<Anchor > sample, int p_index);

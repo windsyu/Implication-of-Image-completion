@@ -187,17 +187,17 @@ void GStructure::AddAnchor(){
     }
 
 }
-double Dist(vector<Point2i> points1, vector<Point2i> points2){
-    double result= 0.0;
+float Dist(vector<Point2i> points1, vector<Point2i> points2){
+    float result= 0.0;
     int i,j;
-    double shortest;
-    double tmp;
-    double normalized = (double) norm(Point2i(PatchSizeRow,PatchSizeCol));
+    float shortest;
+    float tmp;
+    float normalized = (float) norm(Point2i(PatchSizeRow,PatchSizeCol));
 
     for(i = 0; i<points1.size(); i++){
         shortest = INFINITY;
         for(j = 0; j < points2.size(); j++){
-            tmp = (double) norm(points1[i] - points2[j]) / normalized;
+            tmp = (float) norm(points1[i] - points2[j]) / normalized;
             tmp *= tmp;
             if(tmp < shortest)
                 shortest = tmp;
@@ -215,15 +215,15 @@ Point2i GStructure::LeftTopPoint(Anchor anchor, int p_index){
     return p;
 }
 
-double SSD(Mat m1, Mat m2){
-    double temp;
+float SSD(Mat m1, Mat m2){
+    float temp;
     Mat result(1,1,CV_32F);
     if(m1.empty() || m2.empty()){
         cout << "SSD computing non-overlapped area" <<endl;
         return 0.0;
     }
     matchTemplate(m1,m2,result,TM_SQDIFF_NORMED);
-    temp = result.at<double>(0,0);
+    temp = result.at<float>(0,0);
     return temp;
 }
 
@@ -239,8 +239,8 @@ Mat GStructure::GetPatch(Anchor anchor, int lineindex){
     return patch;
 }
 
-double GStructure::ES(Anchor unknow, Anchor sample, int p_index){
-    double result = 0.0;
+float GStructure::ES(Anchor unknow, Anchor sample, int p_index){
+    float result = 0.0;
     int p_num = unknow.end_point - unknow.head_point + 1;
 
     Point2i unknown_left_top, sample_left_top;
@@ -268,7 +268,7 @@ double GStructure::ES(Anchor unknow, Anchor sample, int p_index){
 
     return result;
 }
-double GStructure::EI(Anchor unknow, Anchor sample, int p_index){
+float GStructure::EI(Anchor unknow, Anchor sample, int p_index){
     if(unknow.type != BORDER)
         return 0.0;
     Mat patch_image, patch_mask;
@@ -283,16 +283,16 @@ double GStructure::EI(Anchor unknow, Anchor sample, int p_index){
     sample_image.copyTo(sample_temp, patch_mask);
 //
 //
-    double result = SSD(patch_temp, sample_temp);
+    float result = SSD(patch_temp, sample_temp);
 //
     return result;
 
 }
 
-double GStructure::E1(Anchor unknow, Anchor sample, int p_index){
+float GStructure::E1(Anchor unknow, Anchor sample, int p_index){
     return ks*ES(unknow,sample, p_index) + ki*EI(unknow, sample, p_index);
 }
-double GStructure::E2(Anchor unknow1, Anchor unknow2, Anchor sample1, Anchor sample2, int p_index){
+float GStructure::E2(Anchor unknow1, Anchor unknow2, Anchor sample1, Anchor sample2, int p_index){
     Point2i A, B, C, D;
     A = LeftTopPoint(unknow1,p_index);
     C = LeftTopPoint(unknow2,p_index);
@@ -326,10 +326,10 @@ vector<int> GStructure::DP(vector<Anchor > unknow, vector<Anchor > sample, int p
     vector<int> sample_index;
     int sample_size = sample.size();
     int unknow_size = unknow.size();
-    double **M = new double*[unknow_size];
+    float **M = new float*[unknow_size];
     int **index = new int*[unknow_size];
 	for (int i = 0;i < unknow_size;i++) {
-		M[i] = new double[sample_size];
+		M[i] = new float[sample_size];
 		index[i] = new int[sample_size];
 	}
 		
@@ -338,9 +338,9 @@ vector<int> GStructure::DP(vector<Anchor > unknow, vector<Anchor > sample, int p
 	}
 
 	int i, j, k;
-	double e1;
-	double min_tmp=INFINITY;
-	double tmp;
+	float e1;
+	float min_tmp=INFINITY;
+	float tmp;
 	int index_tmp;
 	for ( i = 1;i < unknow_size;i++) {
 		for (j = 0;j < sample_size;j++) {
@@ -421,21 +421,21 @@ bool GStructure::IsIntersect(int a1, int a2){
 }
 //Belief Propagation
 //
-double* AddTwoVec(double* a1, double* a2, int n){
-    double* re = new double[n];
+float* AddTwoVec(float* a1, float* a2, int n){
+    float* re = new float[n];
 	for (int i = 0;i < n; i++) {
 		re[i] = a1[i] + a2[i];
 	}
 	return re;
 }
-double* MinTwoVec(double* a1, double* a2, int n){
-    double* re = new double[n];
+float* MinTwoVec(float* a1, float* a2, int n){
+    float* re = new float[n];
     for(int i = 0; i<n; i++){
         re[i] = a1[i] - a2[i];
     }
     return re;
 }
-void initialize(double* a, int n){
+void initialize(float* a, int n){
 	for (int i = 0;i < n;i++) {
 		a[i] = 0;
 	}
@@ -446,26 +446,26 @@ vector<int > GStructure::BP(vector<Anchor > unknow, vector<Anchor > sample, int 
     int unknow_size = unknow.size();
     int sample_size = sample.size();
 // M三维矩阵 
-    double ***M = new double **[unknow_size];
+    float ***M = new float **[unknow_size];
 //e1是一个二维矩阵
-    double **e1 = new double*[unknow_size];
+    float **e1 = new float*[unknow_size];
     bool** converged = new bool*[unknow_size];
     bool tmp_flag;
 	for (int i = 0;i < unknow_size; i++) {
-		M[i] = new double *[unknow_size];
+		M[i] = new float *[unknow_size];
 		converged[i] = new bool[unknow_size];
-		e1[i] = new double[sample_size];
+		e1[i] = new float[sample_size];
 		for (int j = 0;j < unknow_size;j++) {
-			M[i][j] = new double[sample_size];
+			M[i][j] = new float[sample_size];
 		}
 	}
 
     int i, j, k, x, y;
 
-	double* neighM_sum = new double[sample_size];
-	double* M_tmp = new double[sample_size];
-	double tmp_min=INFINITY;
-	double* neighM = new double[sample_size];    
+	float* neighM_sum = new float[sample_size];
+	float* M_tmp = new float[sample_size];
+	float tmp_min=INFINITY;
+	float* neighM = new float[sample_size];    
 //初始化 M_tmp, sample_size
 	for (i = 0;i < unknow_size;i++) {
 		for (j = 0;j < unknow_size;j++) {
@@ -536,7 +536,7 @@ vector<int > GStructure::BP(vector<Anchor > unknow, vector<Anchor > sample, int 
 
 
     int index_tmp;
-    double min_tmp;
+    float min_tmp;
 
 
     for(i = 0; i < unknow_size; i++){
