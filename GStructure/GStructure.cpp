@@ -615,7 +615,7 @@ void GStructure::DrawNewRegion(){
 		}
     }
     cout<<"Adjusting" <<endl;
-    _sleep(4000);
+    _sleep(500);
 
 	// for (int i = 0;i < this->lines.size();i++) {
 	// 	cout << this->unknown_anchor[i].size() << " " << this->sample_anchor[i].size() << endl;

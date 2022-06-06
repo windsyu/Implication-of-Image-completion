@@ -70,6 +70,7 @@ private:
 
 //Given unknow 
     void CopyPic(Anchor unknow, Mat patch, Mat fullPic, int p_index);
+
 public:
     GStructure(Mat input);
     ~GStructure(){}
